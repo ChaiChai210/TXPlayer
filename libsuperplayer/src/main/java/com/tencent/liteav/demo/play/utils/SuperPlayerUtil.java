@@ -1,7 +1,7 @@
 package com.tencent.liteav.demo.play.utils;
 
 import com.tencent.liteav.demo.play.bean.TCPlayInfoStream;
-import com.tencent.liteav.demo.play.view.TCVideoQulity;
+import com.tencent.liteav.demo.play.bean.TCVideoQuality;
 import com.tencent.rtmp.TXBitrateItem;
 
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ public class SuperPlayerUtil {
      * @param bitrateItem
      * @return
      */
-    public static TCVideoQulity convertToVideoQuality(TXBitrateItem bitrateItem, int index) {
-        TCVideoQulity quality = new TCVideoQulity();
+    public static TCVideoQuality convertToVideoQuality(TXBitrateItem bitrateItem, int index) {
+        TCVideoQuality quality = new TCVideoQuality();
         quality.bitrate = bitrateItem.bitrate;
         quality.index = bitrateItem.index;
 
@@ -41,8 +41,8 @@ public class SuperPlayerUtil {
         return quality;
     }
 
-    public static TCVideoQulity convertToVideoQuality(TCPlayInfoStream sourceStream, String classification) {
-        TCVideoQulity quality = new TCVideoQulity();
+    public static TCVideoQuality convertToVideoQuality(TCPlayInfoStream sourceStream, String classification) {
+        TCVideoQuality quality = new TCVideoQuality();
         quality.bitrate = sourceStream.getBitrate();
 
         if (classification.equals("FLU")) {
@@ -75,8 +75,8 @@ public class SuperPlayerUtil {
      * @param stream
      * @return
      */
-    public static TCVideoQulity convertToVideoQuality(TCPlayInfoStream stream) {
-        TCVideoQulity qulity = new TCVideoQulity();
+    public static TCVideoQuality convertToVideoQuality(TCPlayInfoStream stream) {
+        TCVideoQuality qulity = new TCVideoQuality();
         qulity.bitrate = stream.getBitrate();
         qulity.name = stream.id;
         qulity.title = stream.name;
@@ -85,10 +85,10 @@ public class SuperPlayerUtil {
         return qulity;
     }
 
-    public static ArrayList<TCVideoQulity> convertToVideoQualityList(HashMap<String, TCPlayInfoStream> transcodeList) {
-        ArrayList<TCVideoQulity> videoQulities = new ArrayList<>();
+    public static ArrayList<TCVideoQuality> convertToVideoQualityList(HashMap<String, TCPlayInfoStream> transcodeList) {
+        ArrayList<TCVideoQuality> videoQulities = new ArrayList<>();
         for (String classification : transcodeList.keySet()) {
-            TCVideoQulity videoQulity = convertToVideoQuality(transcodeList.get(classification));
+            TCVideoQuality videoQulity = convertToVideoQuality(transcodeList.get(classification));
             videoQulities.add(videoQulity);
         }
         return videoQulities;

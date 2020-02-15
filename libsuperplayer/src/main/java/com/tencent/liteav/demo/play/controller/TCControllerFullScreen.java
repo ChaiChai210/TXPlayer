@@ -77,8 +77,8 @@ public class TCControllerFullScreen extends RelativeLayout implements IControlle
 
     private TextView                            mTvQuality;                             // 当前画质文本
     private ImageView                           mIvBack;                                // 顶部标题栏中的返回按钮
-    private ImageView                           mIvDanmu;                               // 弹幕按钮
-    private ImageView                           mIvSnapshot;                            // 截屏按钮
+//    private ImageView                           mIvDanmu;                               // 弹幕按钮
+//    private ImageView                           mIvSnapshot;                            // 截屏按钮
     private ImageView                           mIvLock;                                // 锁屏按钮
     private ImageView                           mIvMore;                                // 更多设置弹窗按钮
     private TCVodQualityView                    mVodQualityView;                        // 画质列表弹窗
@@ -249,9 +249,7 @@ public class TCControllerFullScreen extends RelativeLayout implements IControlle
         mIvLock = (ImageView) findViewById(R.id.iv_lock);
         mTvTitle = (TextView) findViewById(R.id.tv_title);
         mIvPause = (ImageView) findViewById(R.id.iv_pause);
-        mIvDanmu = (ImageView) findViewById(R.id.iv_danmuku);
         mIvMore = (ImageView) findViewById(R.id.iv_more);
-        mIvSnapshot = (ImageView) findViewById(R.id.iv_snapshot);
         mTvCurrent = (TextView) findViewById(R.id.tv_current);
         mTvDuration = (TextView) findViewById(R.id.tv_duration);
 
@@ -273,8 +271,6 @@ public class TCControllerFullScreen extends RelativeLayout implements IControlle
         mIvLock.setOnClickListener(this);
         mIvBack.setOnClickListener(this);
         mIvPause.setOnClickListener(this);
-        mIvDanmu.setOnClickListener(this);
-        mIvSnapshot.setOnClickListener(this);
         mIvMore.setOnClickListener(this);
         mTvQuality.setOnClickListener(this);
         mTvVttText = (TextView) findViewById(R.id.large_tv_vtt_text);
@@ -683,13 +679,6 @@ public class TCControllerFullScreen extends RelativeLayout implements IControlle
         } else if (i == R.id.iv_pause) { //暂停\播放按钮
             togglePlayState();
 
-        } else if (i == R.id.iv_danmuku) {  //弹幕按钮
-            toggleDanmu();
-
-        } else if (i == R.id.iv_snapshot) { //截屏按钮
-            if (mControllerCallback != null) {
-                mControllerCallback.onSnapshot();
-            }
 
         } else if (i == R.id.iv_more) { //更多设置按钮
             showMoreView();
@@ -713,20 +702,6 @@ public class TCControllerFullScreen extends RelativeLayout implements IControlle
         }
     }
 
-    /**
-     * 开关弹幕
-     */
-    private void toggleDanmu() {
-        mDanmuOn = !mDanmuOn;
-        if (mDanmuOn) {
-            mIvDanmu.setImageResource(R.drawable.ic_danmuku_on);
-        } else {
-            mIvDanmu.setImageResource(R.drawable.ic_danmuku_off);
-        }
-        if (mControllerCallback != null) {
-            mControllerCallback.onDanmuToggle(mDanmuOn);
-        }
-    }
 
     /**
      * 显示更多设置弹窗

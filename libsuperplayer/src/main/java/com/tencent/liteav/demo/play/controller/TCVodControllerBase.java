@@ -2,9 +2,6 @@ package com.tencent.liteav.demo.play.controller;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.text.TextUtils;
@@ -21,15 +18,16 @@ import android.widget.TextView;
 
 import com.tencent.liteav.demo.play.R;
 import com.tencent.liteav.demo.play.SuperPlayerConst;
+import com.tencent.liteav.demo.play.bean.TCVideoQuality;
 import com.tencent.liteav.demo.play.utils.TCTimeUtils;
 import com.tencent.liteav.demo.play.utils.VideoGestureUtil;
 import com.tencent.liteav.demo.play.view.TCPointSeekBar;
 import com.tencent.liteav.demo.play.view.TCVideoProgressLayout;
-import com.tencent.liteav.demo.play.view.TCVideoQulity;
 import com.tencent.liteav.demo.play.view.TCVolumeBrightnessProgressLayout;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by liyuejiao on 2018/7/3.
@@ -44,8 +42,8 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
     private boolean isShowing;
     protected boolean mLockScreen;
     private static final double RADIUS_SLOP = Math.PI * 1 / 4;
-    protected TCVideoQulity mDefaultVideoQuality;
-    protected ArrayList<TCVideoQulity> mVideoQualityList;
+    protected TCVideoQuality mDefaultVideoQuality;
+    protected List<TCVideoQuality> mVideoQualityList;
     protected int mPlayType;
     protected long mLivePushDuration;
     protected String mTitle;
@@ -168,9 +166,9 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
                     float currentTime = (mVodController.getDuration() * percentage);
                     if (mPlayType == SuperPlayerConst.PLAYTYPE_LIVE || mPlayType == SuperPlayerConst.PLAYTYPE_LIVE_SHIFT) {
                         if (mLivePushDuration > MAX_SHIFT_TIME) {
-                            currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                            currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                         } else {
-                            currentTime  = mLivePushDuration * percentage;
+                            currentTime = mLivePushDuration * percentage;
                         }
                         mGestureVideoProgressLayout.setTimeText(TCTimeUtils.formattedTime((long) currentTime));
                     } else {
@@ -179,13 +177,13 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
                     onGestureVideoProgress(progress);
 
                 }
-                if (mSeekBarProgress!= null)
+                if (mSeekBarProgress != null)
                     mSeekBarProgress.setProgress(progress);
             }
         });
     }
 
-    public void setVideoQualityList(ArrayList<TCVideoQulity> videoQualityList) {
+    public void setVideoQualityList(ArrayList<TCVideoQuality> videoQualityList) {
         mVideoQualityList = videoQualityList;
         mFirstShowQuality = false;
     }
@@ -216,7 +214,7 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
         if (current < 0) {
             current = 0;
         }
-        if (duration < 0 ){
+        if (duration < 0) {
             duration = 0;
         }
         if (mTvCurrent != null) mTvCurrent.setText(TCTimeUtils.formattedTime(current));
@@ -267,16 +265,15 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
                 mSeekBarProgress.setProgress(progress);
 
 
-
                 int seekTime = 0;
                 float percentage = progress * 1.0f / mSeekBarProgress.getMax();
                 if (mPlayType == SuperPlayerConst.PLAYTYPE_LIVE || mPlayType == SuperPlayerConst.PLAYTYPE_LIVE_SHIFT) {
                     if (mLivePushDuration > MAX_SHIFT_TIME) {
-                        seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                        seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                     } else {
-                        seekTime  = (int) (mLivePushDuration * percentage);
+                        seekTime = (int) (mLivePushDuration * percentage);
                     }
-                }else {
+                } else {
                     seekTime = (int) (percentage * mVodController.getDuration());
                 }
                 mVodController.seekTo(seekTime);
@@ -284,9 +281,9 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
             }
         }
 
-        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
             this.getHandler().removeCallbacks(mHideViewRunnable);
-        } else if(event.getAction() == MotionEvent.ACTION_UP) {
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
             this.getHandler().postDelayed(mHideViewRunnable, 7000);
         }
         return true;
@@ -300,9 +297,9 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
             float currentTime = (mVodController.getDuration() * percentage);
             if (mPlayType == SuperPlayerConst.PLAYTYPE_LIVE || mPlayType == SuperPlayerConst.PLAYTYPE_LIVE_SHIFT) {
                 if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (1 - percentage));
+                    currentTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (1 - percentage));
                 } else {
-                    currentTime  = mLivePushDuration * percentage;
+                    currentTime = mLivePushDuration * percentage;
                 }
                 mGestureVideoProgressLayout.setTimeText(TCTimeUtils.formattedTime((long) currentTime));
             } else {
@@ -339,7 +336,7 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
                 updateLiveLoadingState(true);
                 int seekTime = (int) (mLivePushDuration * curProgress * 1.0f / maxProgress);
                 if (mLivePushDuration > MAX_SHIFT_TIME) {
-                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME *  (maxProgress - curProgress) * 1.0f / maxProgress);
+                    seekTime = (int) (mLivePushDuration - MAX_SHIFT_TIME * (maxProgress - curProgress) * 1.0f / maxProgress);
                 }
                 mVodController.seekTo(seekTime);
                 break;
@@ -458,7 +455,7 @@ public abstract class TCVodControllerBase extends RelativeLayout implements TCPo
 
         void onSnapshot();
 
-        void onQualitySelect(TCVideoQulity quality);
+        void onQualitySelect(TCVideoQuality quality);
 
         void onSpeedChange(float speedLevel);
 

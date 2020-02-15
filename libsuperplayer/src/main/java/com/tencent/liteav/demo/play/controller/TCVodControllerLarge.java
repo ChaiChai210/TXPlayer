@@ -16,12 +16,12 @@ import com.tencent.liteav.demo.play.R;
 import com.tencent.liteav.demo.play.SuperPlayerConst;
 import com.tencent.liteav.demo.play.bean.TCPlayImageSpriteInfo;
 import com.tencent.liteav.demo.play.bean.TCPlayKeyFrameDescInfo;
+import com.tencent.liteav.demo.play.bean.TCVideoQuality;
 import com.tencent.liteav.demo.play.common.TCPlayerConstants;
 import com.tencent.liteav.demo.play.net.LogReport;
 import com.tencent.liteav.demo.play.utils.TCTimeUtils;
 import com.tencent.liteav.demo.play.view.TCPointSeekBar;
 import com.tencent.liteav.demo.play.view.TCVideoProgressLayout;
-import com.tencent.liteav.demo.play.view.TCVideoQulity;
 import com.tencent.liteav.demo.play.view.TCVodMoreView;
 import com.tencent.liteav.demo.play.view.TCVodQualityView;
 import com.tencent.liteav.demo.play.view.TCVolumeBrightnessProgressLayout;
@@ -50,8 +50,6 @@ public class TCVodControllerLarge extends TCVodControllerBase
 //    private SeekBar mSeekBarProgress;
     private TextView mTvQuality;
     private TextView mTvTitle;
-    private ImageView mIvDanmuku;
-    private ImageView mIvSnapshot;
     private ImageView mIvLock;
     private ImageView mIvMore;
     private TCVodQualityView mVodQualityView;
@@ -90,7 +88,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
     void onShow() {
         mLayoutTop.setVisibility(View.VISIBLE);
         mLayoutBottom.setVisibility(View.VISIBLE);
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             this.getHandler().removeCallbacks(mHideLockViewRunnable);
         }
         mIvLock.setVisibility(VISIBLE);
@@ -180,9 +178,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
         mIvLock = (ImageView) findViewById(R.id.iv_lock);
         mTvTitle = (TextView) findViewById(R.id.tv_title);
         mIvPause = (ImageView) findViewById(R.id.iv_pause);
-        mIvDanmuku = (ImageView) findViewById(R.id.iv_danmuku);
         mIvMore = (ImageView) findViewById(R.id.iv_more);
-        mIvSnapshot = (ImageView) findViewById(R.id.iv_snapshot);
         mTvCurrent = (TextView) findViewById(R.id.tv_current);
         mTvDuration = (TextView) findViewById(R.id.tv_duration);
 
@@ -204,8 +200,6 @@ public class TCVodControllerLarge extends TCVodControllerBase
         mIvLock.setOnClickListener(this);
         mIvBack.setOnClickListener(this);
         mIvPause.setOnClickListener(this);
-        mIvDanmuku.setOnClickListener(this);
-        mIvSnapshot.setOnClickListener(this);
         mIvMore.setOnClickListener(this);
         mTvQuality.setOnClickListener(this);
         mTvVttText = (TextView) findViewById(R.id.large_tv_vtt_text);
@@ -236,11 +230,6 @@ public class TCVodControllerLarge extends TCVodControllerBase
         } else if (i == R.id.iv_pause) {
             changePlayState();
 
-        } else if (i == R.id.iv_danmuku) {
-            toggleDanmu();
-
-        } else if (i == R.id.iv_snapshot) {
-            mVodController.onSnapshot();
 
         } else if (i == R.id.iv_more) {
             showMoreView();
@@ -273,7 +262,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
     private void changeLockState() {
         mLockScreen = !mLockScreen;
         mIvLock.setVisibility(VISIBLE);
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             this.getHandler().removeCallbacks(mHideLockViewRunnable);
             this.getHandler().postDelayed(mHideLockViewRunnable, 7000);
         }
@@ -285,19 +274,6 @@ public class TCVodControllerLarge extends TCVodControllerBase
             mIvLock.setImageResource(R.drawable.ic_player_unlock);
             show();
         }
-    }
-
-    /**
-     * 打开/关闭 弹幕
-     */
-    private void toggleDanmu() {
-        mDanmukuOn = !mDanmukuOn;
-        if (mDanmukuOn) {
-            mIvDanmuku.setImageResource(R.drawable.ic_danmuku_on);
-        } else {
-            mIvDanmuku.setImageResource(R.drawable.ic_danmuku_off);
-        }
-        mVodController.onDanmuku(mDanmukuOn);
     }
 
 
@@ -320,9 +296,9 @@ public class TCVodControllerLarge extends TCVodControllerBase
         // 设置默认显示分辨率文字
         mVodQualityView.setVisibility(View.VISIBLE);
         if (!mFirstShowQuality && mDefaultVideoQuality != null) {
-            for (int i = 0 ; i  < mVideoQualityList.size(); i++) {
-                TCVideoQulity quality = mVideoQualityList.get(i);
-                if (quality!=null && quality.title!=null &&quality.title.equals(mDefaultVideoQuality.title)) {
+            for (int i = 0; i < mVideoQualityList.size(); i++) {
+                TCVideoQuality quality = mVideoQualityList.get(i);
+                if (quality != null && quality.title != null && quality.title.equals(mDefaultVideoQuality.title)) {
                     mVodQualityView.setDefaultSelectedQuality(i);
                     break;
                 }
@@ -387,15 +363,15 @@ public class TCVodControllerLarge extends TCVodControllerBase
      *
      * @param videoQulity
      */
-    public void updateVideoQulity(TCVideoQulity videoQulity) {
+    public void updateVideoQulity(TCVideoQuality videoQulity) {
         mDefaultVideoQuality = videoQulity;
         if (mTvQuality != null) {
             mTvQuality.setText(videoQulity.title);
         }
         if (mVideoQualityList != null && mVideoQualityList.size() != 0) {
-            for (int i = 0 ; i  < mVideoQualityList.size(); i++) {
-                TCVideoQulity quality = mVideoQualityList.get(i);
-                if (quality!=null && quality.title!=null &&quality.title.equals(mDefaultVideoQuality.title)) {
+            for (int i = 0; i < mVideoQualityList.size(); i++) {
+                TCVideoQuality quality = mVideoQualityList.get(i);
+                if (quality != null && quality.title != null && quality.title.equals(mDefaultVideoQuality.title)) {
                     mVodQualityView.setDefaultSelectedQuality(i);
                     break;
                 }
@@ -508,7 +484,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
     //
     @Override
     public void onSeekBarPointClick(final View view, final int pos) {
-        if (mHideLockViewRunnable!=null) {
+        if (mHideLockViewRunnable != null) {
             this.getHandler().removeCallbacks(mHideViewRunnable);
             this.getHandler().postDelayed(mHideViewRunnable, 7000);
         }
@@ -641,7 +617,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
     }
 
     @Override
-    public void onQualitySelect(TCVideoQulity quality) {
+    public void onQualitySelect(TCVideoQuality quality) {
         mVodController.onQualitySelect(quality);
         mVodQualityView.setVisibility(View.GONE);
     }
@@ -666,7 +642,7 @@ public class TCVodControllerLarge extends TCVodControllerBase
         super.onToggleControllerView();
         if (mLockScreen) {
             mIvLock.setVisibility(VISIBLE);
-            if (mHideLockViewRunnable!=null) {
+            if (mHideLockViewRunnable != null) {
                 this.getHandler().removeCallbacks(mHideLockViewRunnable);
                 this.getHandler().postDelayed(mHideLockViewRunnable, 7000);
             }
@@ -677,15 +653,16 @@ public class TCVodControllerLarge extends TCVodControllerBase
         }
     }
 
-    private static class HideLockViewRunnable implements Runnable{
+    private static class HideLockViewRunnable implements Runnable {
         private WeakReference<TCVodControllerLarge> mWefControllerLarge;
 
         public HideLockViewRunnable(TCVodControllerLarge controller) {
             mWefControllerLarge = new WeakReference<>(controller);
         }
+
         @Override
         public void run() {
-            if (mWefControllerLarge!=null && mWefControllerLarge.get()!=null) {
+            if (mWefControllerLarge != null && mWefControllerLarge.get() != null) {
                 mWefControllerLarge.get().mIvLock.setVisibility(GONE);
             }
         }

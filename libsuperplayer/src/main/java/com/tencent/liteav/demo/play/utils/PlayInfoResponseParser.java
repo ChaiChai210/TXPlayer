@@ -282,7 +282,7 @@ public class PlayInfoResponseParser {
                 if (classificationList != null) {
                     for (int j = 0; j < classificationList.size(); j++) {
                         TCVideoClassification classification = classificationList.get(j);
-                        ArrayList<Integer> definitionList = classification.getDefinitionList();
+                        List<Integer> definitionList = classification.getDefinitionList();
                         if (definitionList.contains(stream.definition)) {
                             stream.id = classification.getId();
                             stream.name = classification.getName();

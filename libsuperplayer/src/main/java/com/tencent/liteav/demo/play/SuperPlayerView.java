@@ -98,7 +98,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
     private TCControllerFullScreen      mControllerFullScreen;          // 全屏模式控制view
     private TCControllerWindow          mControllerWindow;              // 窗口模式控制view
     private TCControllerFloat           mControllerFloat;               // 悬浮窗模式控制view
-    private TCDanmuView                 mDanmuView;                     // 弹幕
+//    private TCDanmuView                 mDanmuView;                     // 弹幕
     private ViewGroup.LayoutParams      mLayoutParamWindowMode;         // 窗口播放时SuperPlayerView的布局参数
     private ViewGroup.LayoutParams      mLayoutParamFullScreenMode;     // 全屏播放时SuperPlayerView的布局参数
     private LayoutParams                mVodControllerWindowParams;     // 窗口controller的布局参数
@@ -161,7 +161,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         mControllerFullScreen = (TCControllerFullScreen) mRootView.findViewById(R.id.controller_large);
         mControllerWindow = (TCControllerWindow) mRootView.findViewById(R.id.controller_small);
         mControllerFloat = (TCControllerFloat) mRootView.findViewById(R.id.controller_float);
-        mDanmuView = (TCDanmuView) mRootView.findViewById(R.id.danmaku_view);
+//        mDanmuView = (TCDanmuView) mRootView.findViewById(R.id.danmaku_view);
 
         mVodControllerWindowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mVodControllerFullScreenParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -171,7 +171,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         mControllerFloat.setCallback(mControllerCallback);
 
         removeAllViews();
-        mRootView.removeView(mDanmuView);
+//        mRootView.removeView(mDanmuView);
         mRootView.removeView(mTXCloudVideoView);
         mRootView.removeView(mControllerWindow);
         mRootView.removeView(mControllerFullScreen);
@@ -185,7 +185,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
             addView(mControllerWindow);
             mControllerWindow.hide();
         }
-        addView(mDanmuView);
+//        addView(mDanmuView);
 
         post(new Runnable() {
             @Override
@@ -343,6 +343,11 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         }
     }
 
+    public void playWithUrl(String url){
+        mReportVodStartTime = System.currentTimeMillis();
+        mVodPlayer.setPlayerView(mTXCloudVideoView);
+        playVodURL(url);
+    }
     /**
      * 播放FileId视频
      *
@@ -480,9 +485,9 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
      * resume生命周期回调
      */
     public void onResume() {
-        if (mDanmuView != null && mDanmuView.isPrepared() && mDanmuView.isPaused()) {
-            mDanmuView.resume();
-        }
+//        if (mDanmuView != null && mDanmuView.isPrepared() && mDanmuView.isPaused()) {
+//            mDanmuView.resume();
+//        }
         resume();
     }
 
@@ -496,9 +501,9 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
      * pause生命周期回调
      */
     public void onPause() {
-        if (mDanmuView != null && mDanmuView.isPrepared()) {
-            mDanmuView.pause();
-        }
+//        if (mDanmuView != null && mDanmuView.isPrepared()) {
+//            mDanmuView.pause();
+//        }
         pause();
     }
 
@@ -513,10 +518,10 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
      * 重置播放器
      */
     public void resetPlayer() {
-        if (mDanmuView != null) {
-            mDanmuView.release();
-            mDanmuView = null;
-        }
+//        if (mDanmuView != null) {
+//            mDanmuView.release();
+//            mDanmuView = null;
+//        }
         stopPlay();
     }
 
@@ -835,9 +840,9 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
 
         @Override
         public void onDanmuToggle(boolean isOpen) {
-            if (mDanmuView != null) {
-                mDanmuView.toggle(isOpen);
-            }
+//            if (mDanmuView != null) {
+//                mDanmuView.toggle(isOpen);
+//            }
         }
 
         @Override
