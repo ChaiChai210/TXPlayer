@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/libsuperplayer/libsuperplayer.iml" filepath="$PROJECT_DIR$/libsuperplayer/libsuperplayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/lvb/lvb.iml" filepath="$PROJECT_DIR$/lvb/lvb.iml" />
       <module fileurl="file://$PROJECT_DIR$/player/player.iml" filepath="$PROJECT_DIR$/player/player.iml" />
+      <module fileurl="file://$PROJECT_DIR$/superplayer/superplayer.iml" filepath="$PROJECT_DIR$/superplayer/superplayer.iml" />
     </modules>
   </component>
 </project>

@@ -12,11 +12,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,18 +25,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.tencent.liteav.basic.log.TXCLog;
+import com.tencent.liteav.demo.play.SuperPlayerConst;
+import com.tencent.liteav.demo.play.SuperPlayerGlobalConfig;
+import com.tencent.liteav.demo.play.SuperPlayerModel;
+import com.tencent.liteav.demo.play.SuperPlayerVideoId;
+import com.tencent.liteav.demo.play.SuperPlayerView;
 import com.tencent.liteav.demo.player.R;
 import com.tencent.liteav.demo.player.common.activity.QRCodeScanActivity;
 import com.tencent.liteav.demo.player.common.utils.TCConstants;
 import com.tencent.liteav.demo.player.server.GetVideoInfoListListener;
 import com.tencent.liteav.demo.player.server.VideoDataMgr;
 import com.tencent.liteav.demo.player.server.VideoInfo;
-import com.tencent.liteav.basic.log.TXCLog;
-import com.tencent.liteav.demo.play.SuperPlayerConst;
-import com.tencent.liteav.demo.play.SuperPlayerGlobalConfig;
-import com.tencent.liteav.demo.play.SuperPlayerModel;
-import com.tencent.liteav.demo.play.SuperPlayerView;
-import com.tencent.liteav.demo.play.SuperPlayerVideoId;
 import com.tencent.rtmp.TXLiveBase;
 import com.tencent.rtmp.TXLiveConstants;
 
@@ -448,9 +449,9 @@ public class SuperPlayerActivity extends Activity implements View.OnClickListene
         if (mSuperPlayerView.getPlayState() == SuperPlayerConst.PLAYSTATE_PLAYING) {
             Log.i(TAG, "onResume state :" + mSuperPlayerView.getPlayState());
             mSuperPlayerView.onResume();
-            if (mSuperPlayerView.getPlayMode() == SuperPlayerConst.PLAYMODE_FLOAT) {
-                mSuperPlayerView.requestPlayMode(SuperPlayerConst.PLAYMODE_WINDOW);
-            }
+//            if (mSuperPlayerView.getPlayMode() == SuperPlayerConst.PLAYMODE_FLOAT) {
+//                mSuperPlayerView.requestPlayMode(SuperPlayerConst.PLAYMODE_WINDOW);
+//            }
         }
         if (mSuperPlayerView.getPlayMode() == SuperPlayerConst.PLAYMODE_FULLSCREEN) {
             //隐藏虚拟按键，并且全屏
@@ -555,7 +556,8 @@ public class SuperPlayerActivity extends Activity implements View.OnClickListene
         } else if (id == R.id.btnScan) {  //[扫描二维码播放一个视频]
             scanQRCode();
         } else if (id == R.id.iv_back) {  //悬浮窗播放
-            showFloatWindow();
+//            showFloatWindow();
+            finish();
         } else if (id == R.id.text_live) {
             mDataType = LIST_TYPE_LIVE;
             updateList(mDataType);
@@ -613,14 +615,14 @@ public class SuperPlayerActivity extends Activity implements View.OnClickListene
     /**
      * 悬浮窗播放
      */
-    private void showFloatWindow() {
-        if (mSuperPlayerView.getPlayState() == SuperPlayerConst.PLAYSTATE_PLAYING) {
-            mSuperPlayerView.requestPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
-        } else {
-            mSuperPlayerView.resetPlayer();
-            finish();
-        }
-    }
+//    private void showFloatWindow() {
+//        if (mSuperPlayerView.getPlayState() == SuperPlayerConst.PLAYSTATE_PLAYING) {
+//            mSuperPlayerView.requestPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
+//        } else {
+//            mSuperPlayerView.resetPlayer();
+//            finish();
+//        }
+//    }
 
     /**
      * 扫描二维码
@@ -814,28 +816,28 @@ public class SuperPlayerActivity extends Activity implements View.OnClickListene
             mIvAdd.setVisibility(VISIBLE);
         }
     }
-
-    @Override
-    public void onClickFloatCloseBtn() {
-        // 点击悬浮窗关闭按钮，那么结束整个播放
-        mSuperPlayerView.resetPlayer();
-        finish();
-    }
-
-    @Override
-    public void onClickSmallReturnBtn() {
-        // 点击小窗模式下返回按钮，开始悬浮播放
-        showFloatWindow();
-    }
-
-    @Override
-    public void onStartFloatWindowPlay() {
-        // 开始悬浮播放后，直接返回到桌面，进行悬浮播放
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        startActivity(intent);
-    }
+//
+//    @Override
+//    public void onClickFloatCloseBtn() {
+//        // 点击悬浮窗关闭按钮，那么结束整个播放
+//        mSuperPlayerView.resetPlayer();
+//        finish();
+//    }
+//
+//    @Override
+//    public void onClickSmallReturnBtn() {
+//        // 点击小窗模式下返回按钮，开始悬浮播放
+//        showFloatWindow();
+//    }
+//
+//    @Override
+//    public void onStartFloatWindowPlay() {
+//        // 开始悬浮播放后，直接返回到桌面，进行悬浮播放
+//        Intent intent = new Intent(Intent.ACTION_MAIN);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.addCategory(Intent.CATEGORY_HOME);
+//        startActivity(intent);
+//    }
 
     @Override
     public void onRefresh() {

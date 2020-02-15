@@ -3,16 +3,12 @@ package com.tencent.liteav.demo.play;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.PixelFormat;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,9 +21,10 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
 import com.tencent.liteav.basic.log.TXCLog;
+import com.tencent.liteav.demo.play.bean.TCVideoQuality;
 import com.tencent.liteav.demo.play.controller.IControllerCallback;
-import com.tencent.liteav.demo.play.controller.TCControllerFloat;
 import com.tencent.liteav.demo.play.controller.TCControllerFullScreen;
 import com.tencent.liteav.demo.play.controller.TCControllerWindow;
 import com.tencent.liteav.demo.play.net.TCLogReport;
@@ -39,8 +36,6 @@ import com.tencent.liteav.demo.play.utils.TCImageUtil;
 import com.tencent.liteav.demo.play.utils.TCNetWatcher;
 import com.tencent.liteav.demo.play.utils.TCUrlUtil;
 import com.tencent.liteav.demo.play.utils.TCVideoQualityUtil;
-import com.tencent.liteav.demo.play.view.TCDanmuView;
-import com.tencent.liteav.demo.play.bean.TCVideoQuality;
 import com.tencent.rtmp.ITXLivePlayListener;
 import com.tencent.rtmp.ITXVodPlayListener;
 import com.tencent.rtmp.TXBitrateItem;
@@ -60,25 +55,25 @@ import java.util.List;
 
 /**
  * Created by liyuejiao on 2018/7/3.
- *
+ * <p>
  * 超级播放器view
- *
+ * <p>
  * 具备播放器基本功能，此外还包括横竖屏切换、悬浮窗播放、画质切换、硬件加速、倍速播放、镜像播放、手势控制等功能，同时支持直播与点播
- *
+ * <p>
  * 使用方式极为简单，只需要在布局文件中引入并获取到该控件，通过{@link #playWithModel(SuperPlayerModel)}传入{@link SuperPlayerModel}即可实现视频播放
- *
+ * <p>
  * 1、播放视频{@link #playWithModel(SuperPlayerModel)}
- *
+ * <p>
  * 2、设置回调{@link #setPlayerViewCallback(OnSuperPlayerViewCallback)}
- *
+ * <p>
  * 3、点播相关：初始化播放器{@link #initVodPlayer(Context)}，播放事件监听{@link #onPlayEvent(TXVodPlayer, int, Bundle)}，
  * 网络事件监听{@link #onNetStatus(TXVodPlayer, Bundle)}
- *
+ * <p>
  * 4、直播相关：初始化播放器{@link #initLivePlayer(Context)}，播放事件监听{@link #onPlayEvent(int, Bundle)}，
  * 网络事件监听{@link #onNetStatus(Bundle)}
- *
+ * <p>
  * 5、controller回调实现{@link #mControllerCallback}
- *
+ * <p>
  * 5、退出播放释放内存{@link #resetPlayer()}
  */
 
@@ -93,46 +88,46 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
 
     private Context mContext;
     // UI
-    private ViewGroup                   mRootView;                      // SuperPlayerView的根view
-    private TXCloudVideoView            mTXCloudVideoView;              // 腾讯云视频播放view
-    private TCControllerFullScreen      mControllerFullScreen;          // 全屏模式控制view
-    private TCControllerWindow          mControllerWindow;              // 窗口模式控制view
-    private TCControllerFloat           mControllerFloat;               // 悬浮窗模式控制view
+    private ViewGroup mRootView;                      // SuperPlayerView的根view
+    private TXCloudVideoView mTXCloudVideoView;              // 腾讯云视频播放view
+    private TCControllerFullScreen mControllerFullScreen;          // 全屏模式控制view
+    private TCControllerWindow mControllerWindow;              // 窗口模式控制view
+    //    private TCControllerFloat           mControllerFloat;               // 悬浮窗模式控制view
 //    private TCDanmuView                 mDanmuView;                     // 弹幕
-    private ViewGroup.LayoutParams      mLayoutParamWindowMode;         // 窗口播放时SuperPlayerView的布局参数
-    private ViewGroup.LayoutParams      mLayoutParamFullScreenMode;     // 全屏播放时SuperPlayerView的布局参数
-    private LayoutParams                mVodControllerWindowParams;     // 窗口controller的布局参数
-    private LayoutParams                mVodControllerFullScreenParams; // 全屏controller的布局参数
+    private ViewGroup.LayoutParams mLayoutParamWindowMode;         // 窗口播放时SuperPlayerView的布局参数
+    private ViewGroup.LayoutParams mLayoutParamFullScreenMode;     // 全屏播放时SuperPlayerView的布局参数
+    private LayoutParams mVodControllerWindowParams;     // 窗口controller的布局参数
+    private LayoutParams mVodControllerFullScreenParams; // 全屏controller的布局参数
 
-    private WindowManager               mWindowManager;                 // 悬浮窗窗口管理器
-    private WindowManager.LayoutParams  mWindowParams;                  // 悬浮窗布局参数
+    private WindowManager mWindowManager;                 // 悬浮窗窗口管理器
+    private WindowManager.LayoutParams mWindowParams;                  // 悬浮窗布局参数
 
-    private SuperPlayerModel            mCurrentModel;                  // 当前播放的model
-    private IPlayInfoProtocol           mCurrentProtocol;               // 当前视频信息协议类
+    private SuperPlayerModel mCurrentModel;                  // 当前播放的model
+    private IPlayInfoProtocol mCurrentProtocol;               // 当前视频信息协议类
 
-    private TXVodPlayer                 mVodPlayer;                     // 点播播放器
-    private TXVodPlayConfig             mVodPlayConfig;                 // 点播播放器配置
-    private TXLivePlayer                mLivePlayer;                    // 直播播放器
-    private TXLivePlayConfig            mLivePlayConfig;                // 直播播放器配置
+    private TXVodPlayer mVodPlayer;                     // 点播播放器
+    private TXVodPlayConfig mVodPlayConfig;                 // 点播播放器配置
+    private TXLivePlayer mLivePlayer;                    // 直播播放器
+    private TXLivePlayConfig mLivePlayConfig;                // 直播播放器配置
 
-    private OnSuperPlayerViewCallback   mPlayerViewCallback;            // SuperPlayerView回调
-    private TCNetWatcher                mWatcher;                       // 网络质量监视器
-    private String                      mCurrentPlayVideoURL;           // 当前播放的url
-    private int                         mCurrentPlayType;               // 当前播放类型
-    private int                         mCurrentPlayMode = SuperPlayerConst.PLAYMODE_WINDOW;    // 当前播放模式
-    private int                         mCurrentPlayState = SuperPlayerConst.PLAYSTATE_PLAYING; // 当前播放状态
-    private boolean                     mIsMultiBitrateStream;          // 是否是多码流url播放
-    private boolean                     mIsPlayWithFileId;              // 是否是腾讯云fileId播放
-    private long                        mReportLiveStartTime = -1;      // 直播开始时间，用于上报使用时长
-    private long                        mReportVodStartTime = -1;       // 点播开始时间，用于上报使用时长
-    private boolean                     mDefaultQualitySet;             // 标记播放多码流url时是否设置过默认画质
-    private boolean                     mLockScreen = false;            // 是否锁定屏幕
-    private boolean                     mChangeHWAcceleration;          // 切换硬解后接收到第一个关键帧前的标记位
-    private int                         mSeekPos;                       // 记录切换硬解时的播放时间
-    private long                        mMaxLiveProgressTime;           // 观看直播的最大时长
-    private PLAYER_TYPE                 mCurPlayType=PLAYER_TYPE.PLAYER_TYPE_NULL;    //当前播放类型
+    private OnSuperPlayerViewCallback mPlayerViewCallback;            // SuperPlayerView回调
+    private TCNetWatcher mWatcher;                       // 网络质量监视器
+    private String mCurrentPlayVideoURL;           // 当前播放的url
+    private int mCurrentPlayType;               // 当前播放类型
+    private int mCurrentPlayMode = SuperPlayerConst.PLAYMODE_WINDOW;    // 当前播放模式
+    private int mCurrentPlayState = SuperPlayerConst.PLAYSTATE_PLAYING; // 当前播放状态
+    private boolean mIsMultiBitrateStream;          // 是否是多码流url播放
+    private boolean mIsPlayWithFileId;              // 是否是腾讯云fileId播放
+    private long mReportLiveStartTime = -1;      // 直播开始时间，用于上报使用时长
+    private long mReportVodStartTime = -1;       // 点播开始时间，用于上报使用时长
+    private boolean mDefaultQualitySet;             // 标记播放多码流url时是否设置过默认画质
+    private boolean mLockScreen = false;            // 是否锁定屏幕
+    private boolean mChangeHWAcceleration;          // 切换硬解后接收到第一个关键帧前的标记位
+    private int mSeekPos;                       // 记录切换硬解时的播放时间
+    private long mMaxLiveProgressTime;           // 观看直播的最大时长
+    private PLAYER_TYPE mCurPlayType = PLAYER_TYPE.PLAYER_TYPE_NULL;    //当前播放类型
 
-    private final int                   OP_SYSTEM_ALERT_WINDOW = 24;    // 支持TYPE_TOAST悬浮窗的最高API版本
+    private final int OP_SYSTEM_ALERT_WINDOW = 24;    // 支持TYPE_TOAST悬浮窗的最高API版本
 
     public SuperPlayerView(Context context) {
         super(context);
@@ -160,7 +155,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         mTXCloudVideoView = (TXCloudVideoView) mRootView.findViewById(R.id.cloud_video_view);
         mControllerFullScreen = (TCControllerFullScreen) mRootView.findViewById(R.id.controller_large);
         mControllerWindow = (TCControllerWindow) mRootView.findViewById(R.id.controller_small);
-        mControllerFloat = (TCControllerFloat) mRootView.findViewById(R.id.controller_float);
+//        mControllerFloat = (TCControllerFloat) mRootView.findViewById(R.id.controller_float);
 //        mDanmuView = (TCDanmuView) mRootView.findViewById(R.id.danmaku_view);
 
         mVodControllerWindowParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -168,14 +163,14 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
 
         mControllerFullScreen.setCallback(mControllerCallback);
         mControllerWindow.setCallback(mControllerCallback);
-        mControllerFloat.setCallback(mControllerCallback);
+//        mControllerFloat.setCallback(mControllerCallback);
 
         removeAllViews();
 //        mRootView.removeView(mDanmuView);
         mRootView.removeView(mTXCloudVideoView);
         mRootView.removeView(mControllerWindow);
         mRootView.removeView(mControllerFullScreen);
-        mRootView.removeView(mControllerFloat);
+//        mRootView.removeView(mControllerFloat);
 
         addView(mTXCloudVideoView);
         if (mCurrentPlayMode == SuperPlayerConst.PLAYMODE_FULLSCREEN) {
@@ -343,11 +338,12 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         }
     }
 
-    public void playWithUrl(String url){
+    public void playWithUrl(String url) {
         mReportVodStartTime = System.currentTimeMillis();
         mVodPlayer.setPlayerView(mTXCloudVideoView);
         playVodURL(url);
     }
+
     /**
      * 播放FileId视频
      *
@@ -617,7 +613,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
             }
             mControllerFullScreen.hide();
             mControllerWindow.hide();
-            mControllerFloat.hide();
+//            mControllerFloat.hide();
             //请求全屏模式
             if (requestPlayMode == SuperPlayerConst.PLAYMODE_FULLSCREEN) {
                 if (mLayoutParamFullScreenMode == null)
@@ -633,34 +629,34 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
             // 请求窗口模式
             else if (requestPlayMode == SuperPlayerConst.PLAYMODE_WINDOW) {
                 // 当前是悬浮窗
-                if (mCurrentPlayMode == SuperPlayerConst.PLAYMODE_FLOAT) {
-                    try {
-                        Context viewContext = SuperPlayerView.this.getContext();
-                        Intent intent = null;
-                        if (viewContext instanceof Activity) {
-                            intent = new Intent(SuperPlayerView.this.getContext(), viewContext.getClass());
-                        } else {
-                            Toast.makeText(viewContext, "悬浮播放失败", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        mContext.startActivity(intent);
-                        pause();
-                        if (mLayoutParamWindowMode == null)
-                            return;
-                        mWindowManager.removeView(mControllerFloat);
-
-                        if (mCurrentPlayType == SuperPlayerConst.PLAYTYPE_VOD) {
-                            mVodPlayer.setPlayerView(mTXCloudVideoView);
-                        } else {
-                            mLivePlayer.setPlayerView(mTXCloudVideoView);
-                        }
-                        resume();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if (mCurrentPlayMode == SuperPlayerConst.PLAYMODE_FLOAT) {
+//                    try {
+//                        Context viewContext = SuperPlayerView.this.getContext();
+//                        Intent intent = null;
+//                        if (viewContext instanceof Activity) {
+//                            intent = new Intent(SuperPlayerView.this.getContext(), viewContext.getClass());
+//                        } else {
+//                            Toast.makeText(viewContext, "悬浮播放失败", Toast.LENGTH_SHORT).show();
+//                            return;
+//                        }
+//                        mContext.startActivity(intent);
+//                        pause();
+//                        if (mLayoutParamWindowMode == null)
+//                            return;
+//                        mWindowManager.removeView(mControllerFloat);
+//
+//                        if (mCurrentPlayType == SuperPlayerConst.PLAYTYPE_VOD) {
+//                            mVodPlayer.setPlayerView(mTXCloudVideoView);
+//                        } else {
+//                            mLivePlayer.setPlayerView(mTXCloudVideoView);
+//                        }
+//                        resume();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 // 当前是全屏模式
-                else if (mCurrentPlayMode == SuperPlayerConst.PLAYMODE_FULLSCREEN) {
+                if (mCurrentPlayMode == SuperPlayerConst.PLAYMODE_FULLSCREEN) {
                     if (mLayoutParamWindowMode == null)
                         return;
                     removeView(mControllerFullScreen);
@@ -673,63 +669,63 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
                 }
             }
             //请求悬浮窗模式
-            else if (requestPlayMode == SuperPlayerConst.PLAYMODE_FLOAT) {
-                TXCLog.i(TAG, "requestPlayMode Float :" + Build.MANUFACTURER);
-                SuperPlayerGlobalConfig prefs = SuperPlayerGlobalConfig.getInstance();
-                if (!prefs.enableFloatWindow) {
-                    return;
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0动态申请悬浮窗权限
-                    if (!Settings.canDrawOverlays(mContext)) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-                        mContext.startActivity(intent);
-                        return;
-                    }
-                } else {
-                    if (!checkOp(mContext, OP_SYSTEM_ALERT_WINDOW)) {
-                        Toast.makeText(mContext, "进入设置页面失败,请手动开启悬浮窗权限", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-                pause();
-
-                mWindowManager = (WindowManager) mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                mWindowParams = new WindowManager.LayoutParams();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                } else {
-                    mWindowParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-                }
-                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                mWindowParams.format = PixelFormat.TRANSLUCENT;
-                mWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
-
-                SuperPlayerGlobalConfig.TXRect rect = prefs.floatViewRect;
-                mWindowParams.x = rect.x;
-                mWindowParams.y = rect.y;
-                mWindowParams.width = rect.width;
-                mWindowParams.height = rect.height;
-                try {
-                    mWindowManager.addView(mControllerFloat, mWindowParams);
-                } catch (Exception e) {
-                    Toast.makeText(SuperPlayerView.this.getContext(), "悬浮播放失败", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                TXCloudVideoView videoView = mControllerFloat.getFloatVideoView();
-                if (videoView != null) {
-                    if (mCurrentPlayType == SuperPlayerConst.PLAYTYPE_VOD) {
-                        mVodPlayer.setPlayerView(videoView);
-                    } else {
-                        mLivePlayer.setPlayerView(videoView);
-                    }
-                    resume();
-                }
-                // 悬浮窗上报
-                TCLogReport.getInstance().uploadLogs(TCLogReport.ELK_ACTION_FLOATMOE, 0, 0);
-            }
+//            else if (requestPlayMode == SuperPlayerConst.PLAYMODE_FLOAT) {
+//                TXCLog.i(TAG, "requestPlayMode Float :" + Build.MANUFACTURER);
+//                SuperPlayerGlobalConfig prefs = SuperPlayerGlobalConfig.getInstance();
+//                if (!prefs.enableFloatWindow) {
+//                    return;
+//                }
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // 6.0动态申请悬浮窗权限
+//                    if (!Settings.canDrawOverlays(mContext)) {
+//                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+//                        intent.setData(Uri.parse("package:" + mContext.getPackageName()));
+//                        mContext.startActivity(intent);
+//                        return;
+//                    }
+//                } else {
+//                    if (!checkOp(mContext, OP_SYSTEM_ALERT_WINDOW)) {
+//                        Toast.makeText(mContext, "进入设置页面失败,请手动开启悬浮窗权限", Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
+//                }
+//                pause();
+//
+//                mWindowManager = (WindowManager) mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+//                mWindowParams = new WindowManager.LayoutParams();
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+//                } else {
+//                    mWindowParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+//                }
+//                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+//                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+//                mWindowParams.format = PixelFormat.TRANSLUCENT;
+//                mWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
+//
+//                SuperPlayerGlobalConfig.TXRect rect = prefs.floatViewRect;
+//                mWindowParams.x = rect.x;
+//                mWindowParams.y = rect.y;
+//                mWindowParams.width = rect.width;
+//                mWindowParams.height = rect.height;
+//                try {
+//                    mWindowManager.addView(mControllerFloat, mWindowParams);
+//                } catch (Exception e) {
+//                    Toast.makeText(SuperPlayerView.this.getContext(), "悬浮播放失败", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+//
+//                TXCloudVideoView videoView = mControllerFloat.getFloatVideoView();
+//                if (videoView != null) {
+//                    if (mCurrentPlayType == SuperPlayerConst.PLAYTYPE_VOD) {
+//                        mVodPlayer.setPlayerView(videoView);
+//                    } else {
+//                        mLivePlayer.setPlayerView(videoView);
+//                    }
+//                    resume();
+//                }
+//                // 悬浮窗上报
+//                TCLogReport.getInstance().uploadLogs(TCLogReport.ELK_ACTION_FLOATMOE, 0, 0);
+//            }
             mCurrentPlayMode = requestPlayMode;
         }
 
@@ -740,19 +736,19 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
                     onSwitchPlayMode(SuperPlayerConst.PLAYMODE_WINDOW);
                     break;
                 case SuperPlayerConst.PLAYMODE_WINDOW:// 当前是窗口模式，返回退出播放器
-                    if (mPlayerViewCallback != null) {
-                        mPlayerViewCallback.onClickSmallReturnBtn();
-                    }
-                    if (mCurrentPlayState == SuperPlayerConst.PLAYSTATE_PLAYING) {
-                        onSwitchPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
-                    }
+//                    if (mPlayerViewCallback != null) {
+//                        mPlayerViewCallback.onClickSmallReturnBtn();
+//                    }
+//                    if (mCurrentPlayState == SuperPlayerConst.PLAYSTATE_PLAYING) {
+//                        onSwitchPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
+//                    }
                     break;
-                case SuperPlayerConst.PLAYMODE_FLOAT:// 当前是悬浮窗，退出
-                    mWindowManager.removeView(mControllerFloat);
-                    if (mPlayerViewCallback != null) {
-                        mPlayerViewCallback.onClickFloatCloseBtn();
-                    }
-                    break;
+//                case SuperPlayerConst.PLAYMODE_FLOAT:// 当前是悬浮窗，退出
+//                    mWindowManager.removeView(mControllerFloat);
+//                    if (mPlayerViewCallback != null) {
+//                        mPlayerViewCallback.onClickFloatCloseBtn();
+//                    }
+//                    break;
                 default:
                     break;
             }
@@ -760,9 +756,9 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
 
         @Override
         public void onFloatPositionChange(int x, int y) {
-            mWindowParams.x = x;
-            mWindowParams.y = y;
-            mWindowManager.updateViewLayout(mControllerFloat, mWindowParams);
+//            mWindowParams.x = x;
+//            mWindowParams.y = y;
+//            mWindowManager.updateViewLayout(mControllerFloat, mWindowParams);
         }
 
         @Override
@@ -785,7 +781,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         @Override
         public void onResume() {
             if (mCurrentPlayState == SuperPlayerConst.PLAYSTATE_END) { //重播
-                if(mCurPlayType == PLAYER_TYPE.PLAYER_TYPE_LIVE){
+                if (mCurPlayType == PLAYER_TYPE.PLAYER_TYPE_LIVE) {
                     if (TCUrlUtil.isRTMPPlay(mCurrentPlayVideoURL)) {
                         playLiveURL(mCurrentPlayVideoURL, TXLivePlayer.PLAY_TYPE_LIVE_RTMP);
                     } else if (TCUrlUtil.isFLVPlay(mCurrentPlayVideoURL)) {
@@ -794,8 +790,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
                             startMultiStreamLiveURL(mCurrentPlayVideoURL);
                         }
                     }
-                }
-                else {
+                } else {
                     playVodURL(mCurrentPlayVideoURL);
                 }
             } else if (mCurrentPlayState == SuperPlayerConst.PLAYSTATE_PAUSE) { //继续播放
@@ -1006,7 +1001,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
      */
     /**
      * 点播播放器回调
-     *
+     * <p>
      * 具体可参考官网文档：https://cloud.tencent.com/document/product/881/20216
      *
      * @param player
@@ -1061,10 +1056,10 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
                 int duration = param.getInt(TXLiveConstants.EVT_PLAY_DURATION_MS);
                 updateVideoProgress(progress / 1000, duration / 1000);
                 break;
-             case TXLiveConstants.PLAY_EVT_PLAY_BEGIN:{
-                 updatePlayState(SuperPlayerConst.PLAYSTATE_PLAYING);
-                 break;
-             }
+            case TXLiveConstants.PLAY_EVT_PLAY_BEGIN: {
+                updatePlayState(SuperPlayerConst.PLAYSTATE_PLAYING);
+                break;
+            }
             default:
                 break;
         }
@@ -1084,7 +1079,7 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
 
     /**
      * 直播播放器回调
-     *
+     * <p>
      * 具体可参考官网文档：https://cloud.tencent.com/document/product/881/20217
      *
      * @param event 事件id.id类型请参考 {@linkplain TXLiveConstants#PUSH_EVT_CONNECT_SUCC 播放事件列表}.
@@ -1154,24 +1149,24 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
      *
      * @param playMode
      */
-    public void requestPlayMode(int playMode) {
-        if (playMode == SuperPlayerConst.PLAYMODE_WINDOW) {
-            if (mControllerCallback != null) {
-                mControllerCallback.onSwitchPlayMode(SuperPlayerConst.PLAYMODE_WINDOW);
-            }
-        } else if (playMode == SuperPlayerConst.PLAYMODE_FLOAT) {
-            if (mPlayerViewCallback != null) {
-                mPlayerViewCallback.onStartFloatWindowPlay();
-            }
-            if (mControllerCallback != null) {
-                mControllerCallback.onSwitchPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
-            }
-        }
-    }
+//    public void requestPlayMode(int playMode) {
+//        if (playMode == SuperPlayerConst.PLAYMODE_WINDOW) {
+//            if (mControllerCallback != null) {
+//                mControllerCallback.onSwitchPlayMode(SuperPlayerConst.PLAYMODE_WINDOW);
+//            }
+//        } else if (playMode == SuperPlayerConst.PLAYMODE_FLOAT) {
+//            if (mPlayerViewCallback != null) {
+//                mPlayerViewCallback.onStartFloatWindowPlay();
+//            }
+//            if (mControllerCallback != null) {
+//                mControllerCallback.onSwitchPlayMode(SuperPlayerConst.PLAYMODE_FLOAT);
+//            }
+//        }
+//    }
 
     /**
      * 检查悬浮窗权限
-     *
+     * <p>
      * API <18，默认有悬浮窗权限，不需要处理。无法接收无法接收触摸和按键事件，不需要权限和无法接受触摸事件的源码分析
      * API >= 19 ，可以接收触摸和按键事件
      * API >=23，需要在manifest中申请权限，并在每次需要用到权限的时候检查是否已有该权限，因为用户随时可以取消掉。
@@ -1223,20 +1218,20 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
          */
         void onStopFullScreenPlay();
 
-        /**
-         * 点击悬浮窗模式下的x按钮
-         */
-        void onClickFloatCloseBtn();
-
-        /**
-         * 点击小播放模式的返回按钮
-         */
-        void onClickSmallReturnBtn();
-
-        /**
-         * 开始悬浮窗播放
-         */
-        void onStartFloatWindowPlay();
+//        /**
+//         * 点击悬浮窗模式下的x按钮
+//         */
+//        void onClickFloatCloseBtn();
+//
+//        /**
+//         * 点击小播放模式的返回按钮
+//         */
+//        void onClickSmallReturnBtn();
+//
+//        /**
+//         * 开始悬浮窗播放
+//         */
+//        void onStartFloatWindowPlay();
     }
 
     public void release() {
@@ -1246,9 +1241,9 @@ public class SuperPlayerView extends RelativeLayout implements ITXVodPlayListene
         if (mControllerFullScreen != null) {
             mControllerFullScreen.release();
         }
-        if (mControllerFloat != null) {
-            mControllerFloat.release();
-        }
+//        if (mControllerFloat != null) {
+//            mControllerFloat.release();
+//        }
     }
 
     @Override
